@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { SimliClient } from "simli-client";
-import { RTVIClient, RTVIError } from "realtime-ai";
+import { RTVIClient, RTVIError, RTVIEvent } from "realtime-ai";
 import { DailyTransport } from "realtime-ai-daily";
-import { RTVIClientAudio, RTVIClientProvider } from "realtime-ai-react";
+import { RTVIClientAudio, RTVIClientProvider, useRTVIClientEvent } from "realtime-ai-react";
 import VideoBox from "./Components/VideoBox";
 import cn from "./utils/TailwindMergeAndClsx";
 import IconSparkleLoader from "@/media/IconSparkleLoader";
@@ -179,7 +179,30 @@ const SimliDailyBot: React.FC<SimliDailyBotProps> = ({
       await client.connect();
     } catch (e) {
       setError((e as RTVIError).message || "Unknown error occured");
+      console.error("Error connecting to Daily Voice Client:", e);
       client.disconnect();
+    }
+  };
+
+  /**
+   * Get audio element and send to Simli
+   */
+  const getAudioElementAndSendToSimli = () => {
+    if (simliClient) {
+      const audioElements = document.getElementsByTagName("audio");
+
+      for (let i = 0; i < audioElements.length; i++) {
+        if (audioElements[i].id !== "simli_audio") {
+          audioElements[i].muted = true;
+          console.log("Sending audio element to Simli:", audioElements[i]);
+          simliClient.listenToMediastreamTrack(
+            (audioElements[i] as any).captureStream().getTracks()[0]
+          );
+          return;
+        }
+      }
+    } else {
+      setTimeout(getAudioElementAndSendToSimli, 10);
     }
   };
 
@@ -202,6 +225,13 @@ const SimliDailyBot: React.FC<SimliDailyBotProps> = ({
       });
     }
   }, []);
+
+  useRTVIClientEvent(
+    RTVIEvent.TrackStarted,
+    (event) => {
+      console.log("DailyBot: Track started:", event);
+    },
+  );
 
   // Cleanup on unmount
   // useEffect(() => {

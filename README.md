@@ -1,11 +1,11 @@
-# Create Simli App (Vapi)
+# Create Simli App (DailyBot)
 This starter is an example of how to create a composable Simli interaction that runs in a Next.js app.
 
  ## Usage
- 1. Rename .env_sample to .env and paste your API keys: [SIMLI-API-KEY](https://www.simli.com/profile) and [VAPI-API-KEY](https://dashboard.vapi.ai/org/api-keys) <br/> If you want to try Simli but don't have API access to these third parties, ask in Discord and we can help you out with that ([Discord Link](https://discord.gg/yQx49zNF4d)). 
+ 1. Rename .env_sample to .env and paste your API keys: [SIMLI-API-KEY](https://www.simli.com/profile) and [DAILYBOT-API-KEY](https://bots.daily.co/sign-in) <br/> If you want to try Simli but don't have API access to these third parties, ask in Discord and we can help you out with that ([Discord Link](https://discord.gg/yQx49zNF4d)). 
 ```js
 NEXT_PUBLIC_SIMLI_API_KEY="SIMLI-API-KEY"
-NEXT_PUBLIC_VAPI_API_KEY="VAPI-API-KEY"
+DAILY_BOTS_KEY="DAILY-API-KEY"
 ``` 
 
 2. Insall packages
@@ -18,10 +18,9 @@ npm install
 npm run dev
 ```
 
-4. Customize your avatar's face and prompt by editing app/page.tsx. [Create your Vapi agent](https://dashboard.vapi.ai/assistants)
+4. Customize your avatar's face and prompt by editing app/page.tsx.
 ```js
 const avatar = {
-  vapi_agentid: "VAPI-AGENT-ID",
   simli_faceid: "5514e24d-6086-46a3-ace4-6a7264e5cb7c",
 };
 ```
