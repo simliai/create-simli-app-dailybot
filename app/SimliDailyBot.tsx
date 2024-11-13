@@ -1,8 +1,17 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { SimliClient } from "simli-client";
-import { RTVIClient, RTVIClientConfigOption, RTVIError, RTVIEvent } from "realtime-ai";
+import {
+  RTVIClient,
+  RTVIClientConfigOption,
+  RTVIError,
+  RTVIEvent,
+} from "realtime-ai";
 import { DailyTransport } from "realtime-ai-daily";
-import { RTVIClientAudio, RTVIClientProvider, useRTVIClientEvent } from "realtime-ai-react";
+import {
+  RTVIClientAudio,
+  RTVIClientProvider,
+  useRTVIClientEvent,
+} from "realtime-ai-react";
 import VideoBox from "./Components/VideoBox";
 import cn from "./utils/TailwindMergeAndClsx";
 import IconSparkleLoader from "@/media/IconSparkleLoader";
@@ -39,7 +48,6 @@ const SimliDailyBot: React.FC<SimliDailyBotProps> = ({
   // Refs for media elements
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-
 
   /**
    * Handles the start of the interaction
@@ -126,14 +134,14 @@ const SimliDailyBot: React.FC<SimliDailyBotProps> = ({
           connect: "/connect",
           action: "/actions",
         },
-        config : config
+        config: config,
       },
       callbacks: {
         onBotReady: () => {
           console.log("Daily Voice Client connected");
           setIsAvatarVisible(true);
-          getAudioElementAndSendToSimli();
-        }
+          getAudioTrackAndSendToSimli(newVoiceClient);
+        },
       },
     });
 
@@ -161,22 +169,14 @@ const SimliDailyBot: React.FC<SimliDailyBotProps> = ({
   /**
    * Get audio element and send to Simli
    */
-  const getAudioElementAndSendToSimli = () => {
+  const getAudioTrackAndSendToSimli = (client: RTVIClient) => {
     if (simliClient) {
-      const audioElements = document.getElementsByTagName("audio");
-
-      for (let i = 0; i < audioElements.length; i++) {
-        if (audioElements[i].id !== "simli_audio") {
-          audioElements[i].muted = true;
-          console.log("Sending audio element to Simli:", audioElements[i]);
-          simliClient.listenToMediastreamTrack(
-            (audioElements[i] as any).captureStream().getTracks()[0]
-          );
-          return;
-        }
+      const botAudioTrack = client.tracks().bot?.audio;
+      if (botAudioTrack) {
+        simliClient?.listenToMediastreamTrack(botAudioTrack);
+      }else{
+        console.error("Daily Bot track not found");
       }
-    } else {
-      setTimeout(getAudioElementAndSendToSimli, 10);
     }
   };
 
@@ -217,7 +217,7 @@ const SimliDailyBot: React.FC<SimliDailyBotProps> = ({
       >
         <RTVIClientProvider client={voiceClient!}>
           <>
-            <RTVIClientAudio />
+            {/* <RTVIClientAudio /> */}
           </>
         </RTVIClientProvider>
         <VideoBox video={videoRef} audio={audioRef} />

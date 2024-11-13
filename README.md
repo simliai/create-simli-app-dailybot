@@ -18,7 +18,7 @@ npm install
 npm run dev
 ```
 
-4. Customize your avatar's face and prompt by editing app/page.tsx.
+4. Customize your avatar's face and config by editing app/page.tsx. Read more about [DailyBot config](https://docs.dailybots.ai/api-reference/client/configuration)
 ```js
 const avatar = {
   simli_faceid: "5514e24d-6086-46a3-ace4-6a7264e5cb7c",
