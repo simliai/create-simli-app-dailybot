@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { SimliClient } from "simli-client";
-import { RTVIClient, RTVIError, RTVIEvent } from "realtime-ai";
+import { RTVIClient, RTVIClientConfigOption, RTVIError, RTVIEvent } from "realtime-ai";
 import { DailyTransport } from "realtime-ai-daily";
 import { RTVIClientAudio, RTVIClientProvider, useRTVIClientEvent } from "realtime-ai-react";
 import VideoBox from "./Components/VideoBox";
@@ -9,8 +9,10 @@ import IconSparkleLoader from "@/media/IconSparkleLoader";
 
 interface SimliDailyBotProps {
   simli_faceid: string;
-  voiceId: string;
-  initialPrompt: string;
+  stt: string;
+  llm: string;
+  tts: string;
+  config: RTVIClientConfigOption[];
   onStart: () => void;
   onClose: () => void;
   showDottedFace?: boolean;
@@ -20,8 +22,10 @@ const simliClient = new SimliClient();
 
 const SimliDailyBot: React.FC<SimliDailyBotProps> = ({
   simli_faceid,
-  voiceId,
-  initialPrompt,
+  stt,
+  llm,
+  tts,
+  config,
   onStart,
   onClose,
   showDottedFace = false,
@@ -113,53 +117,23 @@ const SimliDailyBot: React.FC<SimliDailyBotProps> = ({
         baseUrl: `/api`,
         requestData: {
           services: {
-            stt: "deepgram",
-            tts: "cartesia",
-            llm: "anthropic",
+            stt: stt,
+            tts: tts,
+            llm: llm,
           },
         },
         endpoints: {
           connect: "/connect",
           action: "/actions",
         },
-        config: [
-          {
-            service: "tts",
-            options: [
-              {
-                name: "voice",
-                value: "79a125e8-cd45-4c13-8a67-188112f4dd22",
-              },
-            ],
-          },
-          {
-            service: "llm",
-            options: [
-              {
-                name: "model",
-                value: "claude-3-5-sonnet-latest",
-              },
-              {
-                name: "initial_messages",
-                value: [
-                  {
-                    role: "user",
-                    content: [
-                      {
-                        type: "text",
-                        text: "You are a pirate.",
-                      },
-                    ],
-                  },
-                ],
-              },
-              {
-                name: "run_on_config",
-                value: true,
-              },
-            ],
-          },
-        ],
+        config : config
+      },
+      callbacks: {
+        onBotReady: () => {
+          console.log("Daily Voice Client connected");
+          setIsAvatarVisible(true);
+          getAudioElementAndSendToSimli();
+        }
       },
     });
 
@@ -225,13 +199,6 @@ const SimliDailyBot: React.FC<SimliDailyBotProps> = ({
       });
     }
   }, []);
-
-  useRTVIClientEvent(
-    RTVIEvent.TrackStarted,
-    (event) => {
-      console.log("DailyBot: Track started:", event);
-    },
-  );
 
   // Cleanup on unmount
   // useEffect(() => {

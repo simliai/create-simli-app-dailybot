@@ -6,18 +6,60 @@ import SimliHeaderLogo from "./Components/Logo";
 import Navbar from "./Components/Navbar";
 import Image from "next/image";
 import GitHubLogo from "@/media/github-mark-white.svg";
+import { RTVIClientConfigOption } from "realtime-ai";
 
 interface avatarSettings {
-  initialPrompt: string;
-  voiceId: string;
+  stt: "deepgram",
+  tts: "cartesia",
+  llm: "anthropic",
   simli_faceid: string;
+  config: RTVIClientConfigOption[];
 }
 
 // Customize your avatar here
 const avatar: avatarSettings = {
-  initialPrompt: "Hello! I'm a Simli avatar. How can I help you today?",
-  voiceId: "pMsXgVXv3BLzUgSXRplE",
+  stt: "deepgram",
+  tts: "cartesia",
+  llm: "anthropic",
   simli_faceid: "101bef0d-b62d-4fbe-a6b4-89bc3fc66ec6",
+  config: [
+    {
+      service: "tts",
+      options: [
+        {
+          name: "voice",
+          value: "79a125e8-cd45-4c13-8a67-188112f4dd22",
+        },
+      ],
+    },
+    {
+      service: "llm",
+      options: [
+        {
+          name: "model",
+          value: "claude-3-5-sonnet-latest",
+        },
+        {
+          name: "initial_messages",
+          value: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: "Act as you are a pirate.",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: "run_on_config",
+          value: true,
+        },
+      ],
+    },
+  ],
 };
 
 const Demo: React.FC = () => {
@@ -53,9 +95,11 @@ const Demo: React.FC = () => {
         <div>
           {showDottedFace && <DottedFace />}
           <SimliDailyBot
-            initialPrompt={avatar.initialPrompt}
-            voiceId={avatar.voiceId}
+            stt={avatar.stt}
+            tts={avatar.tts}
+            llm={avatar.llm}
             simli_faceid={avatar.simli_faceid}
+            config={avatar.config}
             onStart={onStart}
             onClose={onClose}
             showDottedFace={showDottedFace}
