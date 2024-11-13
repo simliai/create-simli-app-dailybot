@@ -56,8 +56,7 @@ const SimliDailyBot: React.FC<SimliDailyBotProps> = ({
       eventListenerSimli();
 
       // Initialize Daily Voice Client
-      await initializeDailyVoiceClient();
-      connectDailyVoiceClient();
+      initializeDailyVoiceClient();
     } catch (error: any) {
       console.error("Error starting interaction:", error);
       setError(`Error starting interaction: ${error.message}`);
@@ -103,7 +102,7 @@ const SimliDailyBot: React.FC<SimliDailyBotProps> = ({
   /**
    * Initialize the Daily Voice Client
    */
-  const initializeDailyVoiceClient = async () => {
+  const initializeDailyVoiceClient = () => {
     if (voiceClient) {
       return;
     }
@@ -165,19 +164,22 @@ const SimliDailyBot: React.FC<SimliDailyBotProps> = ({
     });
 
     setVoiceClient(newVoiceClient);
+    connectDailyVoiceClient(newVoiceClient);
+    console.log("Daily Voice Client initialized");
   };
 
   /**
    * Connect Daily Voice Client
    */
-  const connectDailyVoiceClient = async () => {
-    if (!voiceClient) return;
+  const connectDailyVoiceClient = async (client: RTVIClient) => {
+    if (!client) return;
 
     try {
-      await voiceClient.connect();
+      console.log("Connecting to Daily Voice Client...");
+      await client.connect();
     } catch (e) {
       setError((e as RTVIError).message || "Unknown error occured");
-      voiceClient.disconnect();
+      client.disconnect();
     }
   };
 
@@ -191,7 +193,7 @@ const SimliDailyBot: React.FC<SimliDailyBotProps> = ({
         const audioData = new Uint8Array(6000).fill(0);
         simliClient?.sendAudioData(audioData);
         // Start DailyBot interaction
-        connectDailyVoiceClient();
+        // connectDailyVoiceClient();
         console.log("Sent initial audio data");
       });
 
@@ -202,12 +204,12 @@ const SimliDailyBot: React.FC<SimliDailyBotProps> = ({
   }, []);
 
   // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      simliClient?.close();
-      voiceClient?.disconnect();
-    };
-  }, [voiceClient]);
+  // useEffect(() => {
+  //   return () => {
+  //     simliClient?.close();
+  //     voiceClient?.disconnect();
+  //   };
+  // }, [voiceClient]);
 
   return (
     <>
